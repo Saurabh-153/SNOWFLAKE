@@ -1,0 +1,80 @@
+Steps:
+-------
+1. You should have Snowflake trial account 
+2. You should have Azure trial account
+3. Create storage account and containers in Azure
+4. Upload the source files to these containsers
+5. Create storage integration between Snowflake and Azure
+6. Create stage objects using the storage integration object 
+7. Use copy commands to extract the data from files and load in snowflake tables.
+
+// Creating Azure free trial account
+https://www.youtube.com/watch?v=3Qi9Aqq05Q4
+
+-----------------------------------
+-- Create a storage integration object
+CREATE STORAGE INTEGRATION snow_azure_int
+  TYPE = EXTERNAL_STAGE
+  STORAGE_PROVIDER = AZURE
+  ENABLED = TRUE
+  AZURE_TENANT_ID = '<Azure-Tenant_ID'
+  STORAGE_ALLOWED_LOCATIONS = ('azure://snowazureintg22.blob.core.windows.net/customerdatafiles', 'azure://snowazureintg22.blob.core.windows.net/snowazurefiles');
+  
+-- Describe integration object
+DESC STORAGE INTEGRATION snow_azure_int;
+
+-----------------------------------
+// Create database and schema
+CREATE DATABASE IF NOT EXISTS MYDB;
+CREATE SCHEMA IF NOT EXISTS MYDB.file_formats;
+CREATE SCHEMA IF NOT EXISTS MYDB.external_stages;
+
+// Create file format object
+CREATE OR REPLACE file format mydb.file_formats.csv_fileformat
+    type = csv
+    field_delimiter = '|'
+    skip_header = 1
+    empty_field_as_null = TRUE;    
+    
+// Create stage object with integration object & file format object
+CREATE OR REPLACE STAGE mydb.external_stages.stg_azure_cont
+    URL = 'azure://snowazureintg22.blob.core.windows.net/snowazurefiles'
+    STORAGE_INTEGRATION = snow_azure_int
+    FILE_FORMAT = mydb.file_formats.csv_fileformat ;
+
+
+//Listing files under your azure containers
+list @mydb.external_stages.stg_azure_cont;
+
+
+// Create a table first
+CREATE OR REPLACE TABLE mydb.public.customer_data 
+(
+   customerid NUMBER,
+   custname STRING,
+   email STRING,
+   city STRING,
+   state STRING,
+   DOB DATE
+); 
+
+// Use Copy command to load the files
+COPY INTO mydb.public.customer_data
+    FROM @mydb.external_stages.stg_azure_cont
+    PATTERN = '.*customer.*';    
+	
+//Validate the data
+SELECT * FROM mydb.public.customer_data;
+
+
+Steps to Load data from Azure
+------------------------------
+Step 1: Create storage integration between Snowflake and Azure:
+https://docs.snowflake.com/en/user-guide/data-load-azure-config.html 
+
+Step 2: Create External Stage objects:
+https://docs.snowflake.com/en/user-guide/data-load-azure-create-stage.html 
+
+Step 3: Copy command to load the data from Azure containers to Snowflake tables:
+https://docs.snowflake.com/en/user-guide/data-load-azure-copy.html 
+

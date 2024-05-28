@@ -1,0 +1,28 @@
+{
+	"Name": "Ravi",
+	"Gender": "Male",
+	"DOB": "1990-03-21",
+	"Pets": ["Dog", "Cat"],
+	"Address": {
+		"House Number": "123/4",
+		"City": "Hyderabad",
+		"State": "Telangana" 
+	  },
+	"Phone": {
+		"Work": 123456789,
+		"Mobile": 987654321
+	  }
+},
+{
+	"Name": "Latha",
+	"Gender": "Female",
+	"DOB": "1995-04-16",
+	"Pets": ["Dog", "Rabbit", "Mouse"],
+	"Address": {
+		"House Number": "567/8",
+		"City": "Bangalore",
+		"State": "Karnataka" },
+	"Phone": {
+		"Work": 112233445,
+		"Mobile": 998877665 }
+}
